@@ -1,0 +1,5 @@
+MAILTO="{{ gitlab_ssl_support_email }}"
+
+# This just renews SSL certificates.
+# Reloading services happens separately.
+18 22 * * * root /bin/bash /usr/local/bin/renew-ssl-certificates.sh

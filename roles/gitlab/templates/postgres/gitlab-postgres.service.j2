@@ -1,0 +1,24 @@
+[Unit]
+Description=Gitlab Postgres
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=simple
+ExecStartPre=-/usr/bin/docker kill gitlab-postgres
+ExecStartPre=-/usr/bin/docker rm gitlab-postgres
+
+ExecStart=/usr/bin/docker run --rm --name gitlab-postgres \
+			--log-driver=none \
+			--network={{ gitlab_docker_network }} \
+			--env-file={{ gitlab_postgres_base_path }}/env-postgres-server \
+			-v {{ gitlab_postgres_data_path }}:/var/lib/postgresql:rw \
+			{{ gitlab_postgres_docker_image }}
+
+ExecStop=-/usr/bin/docker kill gitlab-postgres
+ExecStop=-/usr/bin/docker rm gitlab-postgres
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

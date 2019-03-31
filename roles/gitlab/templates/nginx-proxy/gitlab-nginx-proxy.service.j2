@@ -1,0 +1,29 @@
+[Unit]
+Description=Gitlab nginx-proxy server
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=simple
+ExecStartPre=-/usr/bin/docker kill gitlab-nginx-proxy
+ExecStartPre=-/usr/bin/docker rm gitlab-nginx-proxy
+
+ExecStart=/usr/bin/docker run --rm --name gitlab-nginx-proxy \
+			--log-driver=none \
+			--network={{ gitlab_docker_network }} \
+			-p 80:8080 \
+			-p 443:8443 \
+			-v {{ gitlab_nginx_proxy_base_path }}/nginx.conf:/etc/nginx/nginx.conf:ro \
+			-v {{ gitlab_nginx_proxy_data_path }}:/nginx-data:ro \
+			-v {{ gitlab_nginx_proxy_confd_path }}:/etc/nginx/conf.d:ro \
+			-v {{ gitlab_ssl_config_dir_path }}:{{ gitlab_ssl_config_dir_path }}:ro \
+			{{ gitlab_nginx_proxy_docker_image }}
+
+ExecStop=-/usr/bin/docker kill gitlab-nginx-proxy
+ExecStop=-/usr/bin/docker rm gitlab-nginx-proxy
+ExecReload=/usr/bin/docker exec gitlab-nginx-proxy /usr/sbin/nginx -s reload
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

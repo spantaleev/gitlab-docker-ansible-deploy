@@ -1,0 +1,10 @@
+#!/bin/bash
+
+docker run \
+	-it \
+	--rm \
+    --cap-drop=ALL \
+	--env-file={{ gitlab_postgres_base_path }}/env-postgres-psql \
+	--network {{ gitlab_docker_network }} \
+	{{ gitlab_postgres_docker_image }} \
+	psql -h gitlab-postgres

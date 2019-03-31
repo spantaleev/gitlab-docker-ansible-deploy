@@ -1,0 +1,159 @@
+---
+
+# The fully-qualified name of your Gitlab server (e.g. `gitlab.example.com`)
+gitlab_server_fqn_gitlab: ''
+
+gitlab_docker_network: gitlab
+
+# Base directory that contains everything
+gitlab_base_data_path: "/gitlab"
+
+gitlab_gitlab_docker_image_template: "sameersbn/gitlab:__VERSION__"
+gitlab_gitlab_docker_image_tag: "11.8.3"
+gitlab_gitlab_docker_image: "{{ gitlab_gitlab_docker_image_template|replace('__VERSION__', gitlab_gitlab_docker_image_tag) }}"
+
+# Gitlab-related data
+gitlab_gitlab_base_path: "{{ gitlab_base_data_path }}/gitlab"
+gitlab_gitlab_data_dir_path: "{{ gitlab_gitlab_base_path }}/data"
+gitlab_gitlab_log_dir_path: "{{ gitlab_gitlab_base_path }}/log"
+gitlab_gitlab_data_ssh_dir_path: "{{ gitlab_gitlab_data_dir_path }}/ssh"
+gitlab_gitlab_backups_dir_path: "{{ gitlab_gitlab_data_dir_path }}/backups"
+
+gitlab_gitlab_uid: 1000
+gitlab_gitlab_gid: 1000
+
+gitlab_unicorn_workers: 5
+gitlab_sidekiq_concurrency: 5
+
+gitlab_gitlab_default_theme: 2
+
+gitlab_gitlab_projects_wiki: true
+gitlab_gitlab_projects_snippets: true
+gitlab_gitlab_projects_builds: true
+gitlab_gitlab_projects_issues: true
+
+# By default, we try to send through our own mailer service.
+# If you're using an external SMTP server, you might wish to:
+# - disable our own mailer service (`gitlab_mailer_enabled: false`)
+# - enable TLS (`gitlab_gitlab_smtp_tls: true`)
+# - use `gitlab_gitlab_smtp_authentication: login`
+gitlab_gitlab_smtp_enabled: true
+gitlab_gitlab_smtp_domain: "{{ gitlab_server_fqn_gitlab }}"
+gitlab_gitlab_smtp_host: "gitlab-mailer"
+gitlab_gitlab_smtp_port: 25
+gitlab_gitlab_smtp_tls: false
+gitlab_gitlab_smtp_user: ""
+gitlab_gitlab_smtp_pass: ""
+gitlab_gitlab_smtp_authentication: ""
+
+gitlab_gitlab_email: "gitlab@{{ gitlab_server_fqn_gitlab }}"
+gitlab_gitlab_email_reply_to: "{{ gitlab_gitlab_email }}"
+
+# Required secrets (can be generated with something like `pwgen -Bsv1 64`)
+gitlab_gitlab_secrets_otp_key_base: ''
+gitlab_gitlab_secrets_secret_key_base: ''
+gitlab_gitlab_secrets_db_key_base: ''
+
+
+# A list of SSH host keys to install for the Gitlab Shell SSH server.
+#
+# If left empty, Gitlab will generate the keys in the `gitlab_gitlab_data_ssh_dir_path` directory for you.
+# To make them stick (when rebuilding the Gitlab server), you'd either need to make a backup and restore them there manually,
+# or you'd need to define the keys here.
+#
+# Contains definition objects like this:
+#
+# gitlab_shell_ssh_host_keys:
+#  - name: ssh_host_ecdsa_key
+#    type: private
+#    content: |
+#      private key here
+#  - name: ssh_host_ecdsa_key.pub
+#    type: public
+#    content: |
+#      public key here
+#
+# Encrypting the content is preferrable (using `ansible-vault encrypt_string`).
+gitlab_shell_ssh_host_keys: []
+
+
+gitlab_ssl_base_path: "{{ gitlab_base_data_path }}/ssl"
+gitlab_ssl_config_dir_path: "{{ gitlab_ssl_base_path }}/config"
+gitlab_ssl_log_dir_path: "{{ gitlab_ssl_base_path }}/log"
+
+gitlab_ssl_support_email: ""
+gitlab_ssl_certbot_docker_image: "certbot/certbot:v0.31.0"
+gitlab_ssl_certbot_standalone_http_port: 2402
+gitlab_ssl_use_staging: false
+
+gitlab_redis_base_path: "{{ gitlab_base_data_path }}/redis"
+gitlab_redis_data_path: "{{ gitlab_redis_base_path }}/data"
+gitlab_redis_docker_image: "redis:5.0.4-alpine"
+gitlab_redis_uid: 100
+gitlab_redis_gid: 101
+
+
+gitlab_postgres_base_path: "{{ gitlab_base_data_path }}/postgres"
+gitlab_postgres_data_path: "{{ gitlab_postgres_base_path }}/data"
+gitlab_postgres_db_name: "gitlabhq_production"
+gitlab_postgres_connection_username: "gitlab"
+gitlab_postgres_connection_password: "gitlab"
+gitlab_postgres_uid: 101
+gitlab_postgres_gid: 103
+
+# We use this instead of the official one, because we enable some custom extension.
+# See the environment variables file for the server.
+gitlab_postgres_docker_image: "sameersbn/postgresql:10"
+
+
+# We use an official nginx image, which we fix-up to run unprivileged.
+# An alternative would be an `nginxinc/nginx-unprivileged` image, but
+# those as more frequently out of date.
+gitlab_nginx_proxy_docker_image: "nginx:1.15.10-alpine"
+
+gitlab_nginx_proxy_base_path: "{{ gitlab_base_data_path }}/nginx-proxy"
+gitlab_nginx_proxy_data_path: "{{ gitlab_nginx_proxy_base_path }}/data"
+gitlab_nginx_proxy_confd_path: "{{ gitlab_nginx_proxy_base_path }}/conf.d"
+
+gitlab_nginx_proxy_ssl_protocols: "TLSv1.2 TLSv1.3"
+
+
+gitlab_backup_user: backup
+gitlab_backup_cron_email_to: ""
+gitlab_backup_program_install_dir: "/opt/gitlab-backup"
+gitlab_backup_directory: "/home/{{ gitlab_backup_user }}/backups"
+gitlab_backup_encryption_password: ""
+gitlab_backup_user_authorized_keys: []
+gitlab_backup_days_to_keep_locally: 7
+
+gitlab_backup_aws_enabled: false
+gitlab_backup_aws_bucket: bucket-name
+gitlab_backup_aws_region: eu-central-1
+gitlab_backup_aws_access_key_id: ~
+gitlab_backup_aws_secret_key: ~
+
+gitlab_backup_b2_enabled: false
+gitlab_backup_b2_bucket: bucket-name
+gitlab_backup_b2_base_path: "gitlab"
+gitlab_backup_b2_key_id: ~
+gitlab_backup_b2_key_secret: ~
+
+
+# Controls whether to run our own SMTP server.
+# If you'll be using an external one, feel free to disable this.
+gitlab_mailer_enabled: true
+gitlab_mailer_docker_image: "mwader/postfix-relay:latest"
+
+
+gitlab_services_list: |
+  {{
+    (['gitlab-postgres.service'])
+    +
+    (['gitlab-redis.service'])
+    +
+    (['gitlab-gitlab.service'])
+    +
+    (['gitlab-nginx-proxy.service'])
+    +
+    (['gitlab-mailer.service'] if gitlab_mailer_enabled else [])
+  }}

@@ -1,0 +1,35 @@
+---
+
+- name: Determine domains to obtain certificates for
+  set_fact:
+    domains_to_obtain_certificate_for: "['{{ gitlab_server_fqn_gitlab }}']"
+
+- name: Ensure certbot Docker image is pulled
+  docker_image:
+    name: "{{ gitlab_ssl_certbot_docker_image }}"
+
+- name: Ensure SSL certificate paths exists
+  file:
+    path: "{{ gitlab_ssl_base_path }}"
+    state: directory
+    mode: 0750
+    owner: root
+    group: root
+
+- name: Obtain initial certificates
+  include_tasks: "setup_ssl_for_domain.yml"
+  with_items: "{{ domains_to_obtain_certificate_for }}"
+  loop_control:
+    loop_var: domain_name
+
+- name: "Ensure SSL certificate renewal script installed"
+  template:
+    src: "{{ role_path }}/templates/ssl/usr-local-bin/renew-ssl-certificates.sh.j2"
+    dest: "/usr/local/bin/renew-ssl-certificates.sh"
+    mode: 0700
+
+- name: "Ensure SSL certificate renewal cronjob installed"
+  template:
+    src: "{{ role_path }}/templates/ssl/cron.d/gitlab-renew-ssl-certificates.j2"
+    dest: "/etc/cron.d/gitlab-renew-ssl-certificates"
+    mode: 0644

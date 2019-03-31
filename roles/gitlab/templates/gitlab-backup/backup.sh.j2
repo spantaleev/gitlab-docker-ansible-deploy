@@ -1,0 +1,73 @@
+#!/bin/bash
+
+{% if gitlab_backup_aws_enabled %}
+aws() {
+    docker run --rm -w /work \
+        -e HOME=/my-home \
+        -e AWS_ACCESS_KEY_ID={{ gitlab_backup_aws_access_key_id }} \
+        -e AWS_SECRET_ACCESS_KEY={{ gitlab_backup_aws_secret_key }} \
+        -v ~/.aws:/my-home/.aws \
+        -v `pwd`:/work \
+        -v {{ gitlab_backup_directory }}:{{ gitlab_backup_directory }} \
+        --user=`id -u`:`id -g` \
+        cgswong/aws:latest aws $@
+}
+{% endif %}
+
+{% if gitlab_backup_b2_enabled %}
+b2() {
+    cmd='b2 authorize-account $B2_KEY_ID $B2_KEY_SECRET > /dev/null && b2 '$@
+
+    docker run \
+	--rm \
+	-w /work \
+	-e B2_KEY_ID={{ gitlab_backup_b2_key_id }} \
+	-e B2_KEY_SECRET={{ gitlab_backup_b2_key_secret }} \
+	-e B2_ACCOUNT_INFO=/tmp/backblaze-b2.db \
+    -v {{ gitlab_backup_directory }}:{{ gitlab_backup_directory }} \
+	--user=`id -u`:`id -g` \
+	--entrypoint=/bin/sh tianon/backblaze-b2 -c "$cmd"
+}
+{% endif %}
+
+gitlab_source_backup_dir='{{ gitlab_gitlab_backups_dir_path }}'
+encryption_password_file='{{ gitlab_backup_program_install_dir }}/encryption_password.txt'
+target_backup_dir='{{ gitlab_backup_directory }}'
+date=`date +"%Y%m%d"`
+
+docker exec --user git gitlab-gitlab bundle exec rake gitlab:backup:create CRON=1
+
+for backup_path in $(find $gitlab_source_backup_dir -name '*.tar'); do
+	backup_name=$date'-{{ gitlab_server_fqn_gitlab }}-'$(basename $backup_path)'.gpg'
+
+	cat $backup_path | gpg -q -c --batch --no-tty --passphrase-file $encryption_password_file > $target_backup_dir'/'$backup_name
+
+	chmod 400 $target_backup_dir'/'$backup_name
+	chown {{ gitlab_backup_user }}: $target_backup_dir'/'$backup_name
+
+	rm $backup_path
+
+	{% if gitlab_backup_aws_enabled %}
+		aws s3 cp --quiet --region="{{ gitlab_backup_aws_region }}" --storage-class=STANDARD_IA $target_backup_dir'/'$backup_name s3://{{ gitlab_backup_aws_bucket }}/
+	{% else %}
+		# AWS backup copying prevented by configuration. See `gitlab_backup_aws_enabled`.
+	{% endif %}
+
+	{% if gitlab_backup_b2_enabled %}
+		b2_operation_log_file=$(mktemp /tmp/gitlab-backup-b2-XXXXXXXXXXX.log)
+
+		# "b2 sync" would always output something like: "upload 20181227-gitlab.DOMAIN-1545902385_2018_12_27_11.5.4_gitlab_backup.tar.gpg",
+		# so we need to ignore it.
+		b2 sync --noProgress --excludeRegex '.+' --includeRegex '^'$backup_name'$' $target_backup_dir'/' b2://{{ gitlab_backup_b2_bucket }}/{{ gitlab_backup_b2_base_path }}/ > $b2_operation_log_file 2>&1
+
+		ret_val=$?
+		if [ $ret_val -ne 0 ]; then
+			cat $b2_operation_log_file
+			# We don't exit here intentionally, as we want to proceed
+			# with any next file in the list (for loop above).
+		fi
+		rm $b2_operation_log_file
+	{% else %}
+		# B2 backup copying prevented by configuration. See `gitlab_backup_b2_enabled`.
+	{% endif %}
+done;

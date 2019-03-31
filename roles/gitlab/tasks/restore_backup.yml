@@ -1,0 +1,115 @@
+# Defaults
+
+- name: Set gitlab_services_start_wait_time, if not provided
+  set_fact:
+    gitlab_services_start_wait_time: 15
+  when: "gitlab_services_start_wait_time|default('') == ''"
+
+- name: Set gitlab_import_wait_time, if not provided
+  set_fact:
+    gitlab_import_wait_time: "{{ 4 * 3600 }}"
+  when: "gitlab_import_wait_time|default('') == ''"
+
+- name: Fail if playbook called incorrectly
+  fail: msg="The `gitlab_backup_name` variable needs to be provided to this playbook, via --extra-vars"
+  when: gitlab_backup_name is not defined
+
+- set_fact:
+    gitlab_backup_path_host: "{{ gitlab_gitlab_backups_dir_path }}/{{ gitlab_backup_name }}"
+
+- name: Ensure provided backup file exists
+  stat:
+    path: "{{ gitlab_backup_path_host }}"
+  register: gitlab_backup_path_host_stat
+
+- name: Fail if provided backup file doesn't exist on the server
+  fail: msg="Backup file cannot be found at {{ gitlab_backup_path_host }}"
+  when: not gitlab_backup_path_host_stat.stat.exists
+
+# The /bin/true hack is just to prevent Ansible from complaining about us not using the `unarchive` module
+- name: Determine Gitlab version from the backup file (1/2)
+  shell: >-
+    /bin/true && tar xf {{ gitlab_backup_path_host|quote }} backup_information.yml -O | grep ':gitlab_version:' | cut -d ' ' -f 2
+  register: gitlab_backup_version_result
+  changed_when: False
+
+- name: Determine Gitlab version from the backup file (2/2)
+  set_fact:
+    gitlab_backup_version: "{{ gitlab_backup_version_result.stdout }}"
+  changed_when: False
+
+- name: Fail if determined backup version looks suspicious
+  fail: msg="Determined version `{{ gitlab_backup_version }}` looks suspicious"
+  when: not gitlab_backup_version is search("\d\.\d(\.\d)?")
+
+- set_fact:
+    gitlab_gitlab_docker_image_expected: "{{ gitlab_gitlab_docker_image_template|replace('__VERSION__', gitlab_backup_version) }}"
+
+- name: Fail if determined backup version is different than the installed Gitlab version
+  fail:
+    msg: |-
+      The backup was determined to be for Gitlab `{{ gitlab_backup_version }}`.
+      Your server, howerver, is running a Docker image for a different version (`{{ gitlab_gitlab_docker_image_tag }}`).
+      You should force-install the other image first, do the restore, and then potentially upgrade.
+      Before restoring, re-run the playbook's installation with the following custom variables:
+      `gitlab_gitlab_docker_image: {{ gitlab_gitlab_docker_image_template|replace('__VERSION__', gitlab_backup_version) }}`
+  when: "gitlab_gitlab_docker_image_expected != gitlab_gitlab_docker_image"
+
+- name: Ensure systemd reloaded
+  service:
+    daemon_reload: yes
+
+- name: Ensure Gitlab services started
+  service:
+    name: "{{ item }}"
+    state: started
+  with_items: "{{ gitlab_services_list }}"
+
+- name: Wait a bit, so that services can start
+  wait_for:
+    timeout: "{{ gitlab_services_start_wait_time }}"
+  delegate_to: 127.0.0.1
+  become: false
+
+# This needs to be executed for newly-installed servers only.
+# We do it in all cases though, to avoid having to discern between initialized/non-initialized databases.
+# To make this work for an existing database (that is, to force it to destroy an existing production database),
+# we need to pass `DISABLE_DATABASE_ENVIRONMENT_CHECK=1`.
+- name: Generate Gitlab database setup command
+  set_fact:
+    gitlab_database_setup_command: >-
+      /usr/bin/docker exec gitlab-gitlab
+      /sbin/entrypoint.sh app:rake db:setup DISABLE_DATABASE_ENVIRONMENT_CHECK=1
+
+- name: Note about Gitlab database setup
+  debug:
+    msg: >-
+      Preparing Gitlab database with the following command: `{{ gitlab_database_setup_command }}`
+
+- name: Perform Gitlab database setup
+  command: "{{ gitlab_database_setup_command }}"
+  async: "{{ gitlab_import_wait_time }}"
+  poll: 10
+
+# We need to use `force=yes` for this to make it non-interactive.
+# Otherwise it wants to ask us for confirmation.
+- name: Generate Gitlab backup restore command
+  set_fact:
+    gitlab_backup_restore_command: >-
+      /usr/bin/docker exec gitlab-gitlab
+      /sbin/entrypoint.sh app:rake gitlab:backup:restore BACKUP={{ gitlab_backup_name|replace('_gitlab_backup.tar', '') }} force=yes
+
+- name: Note about Gitlab backup restore
+  debug:
+    msg: >-
+      Restoring Gitlab backup with the following command: `{{ gitlab_backup_restore_command }}`
+
+- name: Perform Gitlab backup restore
+  command: "{{ gitlab_backup_restore_command }}"
+  async: "{{ gitlab_import_wait_time }}"
+  poll: 10
+
+- name: Ensure Gitlab restarted
+  service:
+    name: "gitlab-gitlab"
+    state: restarted

@@ -1,0 +1,26 @@
+#!/bin/bash
+if [ $# -ne 2 ]
+then
+        echo "Usage: script.sh <path> <days modified before>";
+        exit 1;
+fi;
+
+path=$1;
+days=$2;
+
+# Delete all old backups
+for f in $(find $path -mtime +$days -type f); do
+        rm $f;
+done;
+
+# Delete any directories the backups belong to, which are now empty
+for d in $(find $path -mindepth 1 -maxdepth 1 -type d); do
+        rmdir --ignore-fail-on-non-empty $d;
+done;
+
+remaining_files=$(find $path -type f | wc -l);
+
+if [ $remaining_files -eq 0 ]
+then
+    echo "0 files remain in "$path" - maybe new backups are not created correctly?";
+fi;

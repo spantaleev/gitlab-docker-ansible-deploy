@@ -1,0 +1,46 @@
+server {
+	listen 8080;
+	server_name {{ gitlab_server_fqn_gitlab }};
+
+	server_tokens off;
+
+	location /.well-known/acme-challenge {
+		{# Use the embedded DNS resolver in Docker containers to discover the service #}
+		resolver 127.0.0.11 valid=5s;
+		set $backend "gitlab-certbot:8080";
+		proxy_pass http://$backend;
+	}
+
+	location / {
+		return 301 https://$http_host$request_uri;
+	}
+}
+
+server {
+	listen 8443 ssl http2;
+	listen [::]:8443 ssl http2;
+
+	server_name {{ gitlab_server_fqn_gitlab }};
+
+	server_tokens off;
+	root /dev/null;
+
+	gzip on;
+	gzip_types text/plain application/json application/javascript text/css image/x-icon font/ttf image/gif;
+
+	ssl_certificate {{ gitlab_ssl_config_dir_path }}/live/{{ gitlab_server_fqn_gitlab }}/fullchain.pem;
+	ssl_certificate_key {{ gitlab_ssl_config_dir_path }}/live/{{ gitlab_server_fqn_gitlab }}/privkey.pem;
+	ssl_protocols {{ gitlab_nginx_proxy_ssl_protocols }};
+	ssl_prefer_server_ciphers on;
+	ssl_ciphers "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH";
+
+	location / {
+		{# Use the embedded DNS resolver in Docker containers to discover the service #}
+		resolver 127.0.0.11 valid=5s;
+		set $backend "gitlab-gitlab:80";
+		proxy_pass http://$backend;
+
+		proxy_set_header Host $host;
+		proxy_set_header X-Forwarded-For $remote_addr;
+	}
+}

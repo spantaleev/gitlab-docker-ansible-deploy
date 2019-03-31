@@ -1,0 +1,33 @@
+---
+
+- name: Ensure Gitlab base path exists
+  file:
+    path: "{{ gitlab_base_data_path }}"
+    state: directory
+    mode: 0750
+    owner: root
+    group: root
+
+# `docker_network` doesn't work as expected when the given network
+# is a substring of a network that already exists.
+#
+# See:
+# - https://github.com/spantaleev/matrix-docker-ansible-deploy/issues/12
+# - https://github.com/ansible/ansible/issues/32926
+#
+# Due to that, we employ a workaround below.
+#
+# - name: Ensure Gitlab network is created in Docker
+#   docker_network:
+#     name: "{{ gitlab_docker_network }}"
+#     driver: bridge
+- name: Check existence of Gitlab network in Docker
+  shell:
+    cmd: "docker network ls -q --filter='name=^{{ gitlab_docker_network }}$'"
+  register: gitlab_result_docker_network
+  changed_when: false
+
+- name: Create Gitlab network in Docker
+  shell:
+    cmd: "docker network create --driver=bridge {{ gitlab_docker_network }}"
+  when: "gitlab_result_docker_network.stdout == ''"

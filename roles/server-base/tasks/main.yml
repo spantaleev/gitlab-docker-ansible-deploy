@@ -1,0 +1,3 @@
+- import_tasks: "{{ role_path }}/tasks/setup_server_base.yml"
+  tags:
+    - setup-all

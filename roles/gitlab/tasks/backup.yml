@@ -1,0 +1,12 @@
+---
+
+- name: Set gitlab_backup_wait_time, if not provided
+  set_fact:
+    gitlab_backup_wait_time: "{{ 4 * 3600 }}"
+  when: "gitlab_backup_wait_time|default('') == ''"
+
+- name: Creating backup
+  command: |
+    /bin/bash {{ gitlab_backup_program_install_dir }}/backup.sh
+  async: "{{ gitlab_backup_wait_time }}"
+  poll: 10

@@ -1,0 +1,15 @@
+---
+
+- name: Fail if required settings not defined
+  fail:
+    msg: >-
+      You need to define a required configuration setting (`{{ item }}`) for using this role.
+  when: "vars[item] == ''"
+  with_items:
+    - "gitlab_server_fqn_gitlab"
+    - "gitlab_gitlab_secrets_otp_key_base"
+    - "gitlab_gitlab_secrets_secret_key_base"
+    - "gitlab_gitlab_secrets_db_key_base"
+    - "gitlab_ssl_support_email"
+    - "gitlab_backup_cron_email_to"
+    - "gitlab_backup_encryption_password"

@@ -1,0 +1,57 @@
+---
+
+gitlab_server_fqn_gitlab: "gitlab.YOUR_DOMAIN_NAME_HERE"
+
+# Required secrets (can be generated with something like `pwgen -Bsv1 64`)
+# We recommend encrypting the values using `ansible-vault encrypt_string`.
+gitlab_gitlab_secrets_otp_key_base: ''
+gitlab_gitlab_secrets_secret_key_base: ''
+gitlab_gitlab_secrets_db_key_base: ''
+
+# Choose an encryption password (to be used for gpg).
+# We recommend encrypting the values using `ansible-vault encrypt_string`.
+gitlab_backup_encryption_password: ''
+
+gitlab_backup_cron_email_to: YOUR_EMAIL_ADDRESS_HERE
+
+gitlab_ssl_support_email: YOUR_EMAIL_ADDRESS_HERE
+
+# After you've installed Gitlab for the first time and everything is running,
+# you should uncomment and populate this.
+#
+# The SSH host keys are in `/gitlab/gitlab/data/ssh` (`gitlab_gitlab_data_ssh_dir_path`) on the server.
+# You can paste the content for each key in the corresponding place.
+# We recommend encrypting the values using `ansible-vault encrypt_string`.
+#
+# gitlab_shell_ssh_host_keys:
+#   - name: ssh_host_ecdsa_key
+#     type: private
+#     content: |
+#       content will be here
+
+#   - name: ssh_host_ecdsa_key.pub
+#     type: public
+#     content: |
+#       content will be here
+
+#   - name: ssh_host_ed25519_key
+#     type: private
+#     content: |
+#       content will be here
+
+#   - name: ssh_host_ed25519_key.pub
+#     type: public
+#     content: |
+#       content will be here
+
+#   - name: ssh_host_rsa_key
+#     type: private
+#     content: |
+#       content will be here
+
+#   - name: ssh_host_rsa_key.pub
+#     type: public
+#     content: |
+#       content will be here
+
+

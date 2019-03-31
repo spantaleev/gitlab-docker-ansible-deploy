@@ -1,0 +1,45 @@
+---
+
+- block:
+    - name: Ensure mailer image is pulled
+      docker_image:
+        name: "{{ gitlab_mailer_docker_image }}"
+
+    - name: Ensure gitlab-mailer.service installed
+      template:
+        src: "{{ role_path }}/templates/mailer/gitlab-mailer.service.j2"
+        dest: "/etc/systemd/system/gitlab-mailer.service"
+        mode: 0644
+      register: gitlab_mailer_systemd_service_result
+
+    - name: Ensure systemd reloaded after gitlab-mailer.service installation
+      service:
+        daemon_reload: yes
+      when: gitlab_mailer_systemd_service_result.changed
+  when: gitlab_mailer_enabled
+
+- block:
+    - name: Check existence of gitlab-mailer service
+      stat:
+        path: "/etc/systemd/system/gitlab-mailer.service"
+      register: gitlab_mailer_service_stat
+
+    - name: Ensure gitlab-mailer is stopped
+      service:
+        name: gitlab-mailer
+        state: stopped
+        daemon_reload: yes
+      register: stopping_result
+      when: gitlab_mailer_service_stat.stat.exists
+
+    - name: Ensure gitlab-mailer.service doesn't exist
+      file:
+        path: "/etc/systemd/system/gitlab-mailer.service"
+        state: absent
+      when: gitlab_mailer_service_stat.stat.exists
+
+    - name: Ensure systemd reloaded after gitlab-mailer.service removal
+      service:
+        daemon_reload: yes
+      when: gitlab_mailer_service_stat.stat.exists
+  when: not gitlab_mailer_enabled

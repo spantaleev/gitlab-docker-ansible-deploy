@@ -1,0 +1,24 @@
+[Unit]
+Description=Gitlab mailer
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=simple
+ExecStartPre=-/usr/bin/docker kill gitlab-mailer
+ExecStartPre=-/usr/bin/docker rm gitlab-mailer
+
+ExecStart=/usr/bin/docker run --rm --name gitlab-mailer \
+			--log-driver=none \
+			--network={{ gitlab_docker_network }} \
+			--hostname={{ gitlab_server_fqn_gitlab }} \
+			-e POSTFIX_myhostname={{ gitlab_server_fqn_gitlab }} \
+			{{ gitlab_mailer_docker_image }}
+
+ExecStop=-/usr/bin/docker kill gitlab-mailer
+ExecStop=-/usr/bin/docker rm gitlab-mailer
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

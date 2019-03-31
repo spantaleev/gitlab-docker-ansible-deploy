@@ -1,0 +1,2 @@
+[gitlab-servers]
+gitlab.<your-domain> ansible_host=<your-server's IP address> ansible_ssh_port=222

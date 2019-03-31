@@ -1,0 +1,5 @@
+MAILTO="{{ gitlab_ssl_support_email }}"
+
+# This cronjob is so that new SSL certificates would kick in.
+# SSL renewal is triggered separately.
+18 23 * * * root /bin/systemctl reload gitlab-nginx-proxy.service

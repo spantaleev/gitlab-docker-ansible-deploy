@@ -1,0 +1,24 @@
+[Unit]
+Description=Gitlab Redis
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=simple
+ExecStartPre=-/usr/bin/docker kill gitlab-redis
+ExecStartPre=-/usr/bin/docker rm gitlab-redis
+
+ExecStart=/usr/bin/docker run --rm --name gitlab-redis \
+			--log-driver=none \
+			--network={{ gitlab_docker_network }} \
+			-v {{ gitlab_redis_data_path }}:/data:rw \
+			{{ gitlab_redis_docker_image }} \
+			redis-server --appendonly yes
+
+ExecStop=-/usr/bin/docker kill gitlab-redis
+ExecStop=-/usr/bin/docker rm gitlab-redis
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# For renewal to work, gitlab-nginx-proxy (or another webserver, if gitlab-nginx-proxy is disabled)
+# need to forward requests for `/.well-known/acme-challenge` to the certbot container.
+#
+# This can happen inside the container network by proxying to `http://gitlab-certbot:8080`.
+
+docker run \
+	--rm \
+	--name=gitlab-certbot \
+	--network="{{ gitlab_docker_network }}" \
+	-v {{ gitlab_ssl_config_dir_path }}:/etc/letsencrypt \
+	-v {{ gitlab_ssl_log_dir_path }}:/var/log/letsencrypt \
+	{{ gitlab_ssl_certbot_docker_image }} \
+	renew \
+		--non-interactive \
+		--work-dir=/tmp \
+		--http-01-port 8080 \
+		{% if gitlab_ssl_use_staging %}
+			--staging \
+		{% endif %}
+		--quiet \
+		--standalone \
+		--preferred-challenges http \
+		--agree-tos \
+		--email={{ gitlab_ssl_support_email }}

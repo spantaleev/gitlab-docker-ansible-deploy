@@ -1,0 +1,5 @@
+MAILTO="{{ gitlab_backup_cron_email_to }}"
+
+12 4 * * * root {{ gitlab_backup_program_install_dir }}/backup.sh
+
+15 6 * * * root {{ gitlab_backup_program_install_dir }}/delete-old-backups.sh {{ gitlab_backup_directory|quote }} {{ gitlab_backup_days_to_keep_locally }}

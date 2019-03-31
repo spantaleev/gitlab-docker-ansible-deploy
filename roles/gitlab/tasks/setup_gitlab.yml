@@ -1,0 +1,57 @@
+---
+
+- name: Ensure Gitlab image is pulled
+  docker_image:
+    name: "{{ gitlab_gitlab_docker_image }}"
+
+- name: Ensure Gitlab paths exist
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: "{{ item.mode }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+  with_items:
+    - path: "{{ gitlab_gitlab_data_dir_path }}"
+      owner: "{{ gitlab_gitlab_uid }}"
+      group: "{{ gitlab_gitlab_uid }}"
+      mode: '0755'
+
+    - path: "{{ gitlab_gitlab_log_dir_path }}"
+      owner: "{{ gitlab_gitlab_uid }}"
+      group: "{{ gitlab_gitlab_uid }}"
+      mode: '0755'
+
+    - path: "{{ gitlab_gitlab_data_ssh_dir_path }}"
+      owner: "0"
+      group: "0"
+      mode: '0777'
+
+- name: Ensure Gitlab environment variables file created
+  template:
+    src: "{{ role_path }}/templates/gitlab/{{ item }}.j2"
+    dest: "{{ gitlab_gitlab_base_path }}/{{ item }}"
+    mode: 0640
+  with_items:
+    - "env-gitlab"
+
+- name: Ensure Gitlab SSH host keys installed (if provided)
+  copy:
+    content: "{{ item.content }}"
+    dest: "{{ gitlab_gitlab_data_ssh_dir_path }}/{{ item.name }}"
+    owner: "root"
+    group: "root"
+    mode: "{{ '0600' if item.type == 'private' else '0644' }}"
+  with_items: "{{ gitlab_shell_ssh_host_keys }}"
+
+- name: Ensure gitlab-gitlab.service installed
+  template:
+    src: "{{ role_path }}/templates/gitlab/gitlab-gitlab.service.j2"
+    dest: "/etc/systemd/system/gitlab-gitlab.service"
+    mode: 0644
+  register: gitlab_gitlab_systemd_service_result
+
+- name: Ensure systemd reloaded after gitlab-gitlab.service installation
+  service:
+    daemon_reload: yes
+  when: gitlab_gitlab_systemd_service_result.changed

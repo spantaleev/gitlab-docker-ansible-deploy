@@ -1,0 +1,28 @@
+---
+
+- name: Ensure Redis image is pulled
+  docker_image:
+    name: "{{ gitlab_redis_docker_image }}"
+
+- name: Ensure Redis paths exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0700
+    owner: "{{ gitlab_redis_uid }}"
+    group: "{{ gitlab_redis_gid }}"
+  with_items:
+    - "{{ gitlab_redis_base_path }}"
+    - "{{ gitlab_redis_data_path }}"
+
+- name: Ensure gitlab-redis.service installed
+  template:
+    src: "{{ role_path }}/templates/redis/gitlab-redis.service.j2"
+    dest: "/etc/systemd/system/gitlab-redis.service"
+    mode: 0644
+  register: gitlab_nginx_proxy_systemd_service_result
+
+- name: Ensure systemd reloaded after gitlab-redis.service installation
+  service:
+    daemon_reload: yes
+  when: gitlab_nginx_proxy_systemd_service_result.changed

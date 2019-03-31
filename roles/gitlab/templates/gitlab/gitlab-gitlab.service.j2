@@ -1,0 +1,31 @@
+[Unit]
+Description=Gitlab
+Requires=docker.service
+After=docker.service
+Requires=gitlab-postgres.service
+After=gitlab-postgres.service
+Requires=gitlab-redis.service
+After=gitlab-redis.service
+
+[Service]
+Type=simple
+ExecStartPre=-/usr/bin/docker kill gitlab-gitlab
+ExecStartPre=-/usr/bin/docker rm gitlab-gitlab
+
+ExecStart=/usr/bin/docker run --rm --name gitlab-gitlab \
+			--log-driver=none \
+			--network={{ gitlab_docker_network }} \
+			--hostname={{ gitlab_server_fqn_gitlab }} \
+			-p 22:22 \
+			--env-file={{ gitlab_gitlab_base_path }}/env-gitlab \
+			--volume {{ gitlab_gitlab_data_dir_path }}:/home/git/data \
+			--volume {{ gitlab_gitlab_log_dir_path }}:/var/log/gitlab \
+			{{ gitlab_gitlab_docker_image }}
+
+ExecStop=-/usr/bin/docker kill gitlab-gitlab
+ExecStop=-/usr/bin/docker rm gitlab-gitlab
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

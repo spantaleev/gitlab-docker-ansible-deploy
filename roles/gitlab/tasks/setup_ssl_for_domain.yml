@@ -1,0 +1,72 @@
+- debug:
+    msg: "Dealing with SSL certificate retrieval for domain: {{ domain_name }}"
+
+- set_fact:
+    domain_name_certificate_path: "{{ gitlab_ssl_config_dir_path }}/live/{{ domain_name }}/cert.pem"
+
+- name: Check if a certificate for the domain already exists
+  stat:
+    path: "{{ domain_name_certificate_path }}"
+  register: domain_name_certificate_path_stat
+
+- set_fact:
+    domain_name_needs_cert: "{{ not domain_name_certificate_path_stat.stat.exists }}"
+
+# This will fail if there is something running on port 80 (like gitlab-nginx-proxy).
+# We suppress the error, as we'll try another method below.
+- name: Attempt initial SSL certificate retrieval with standalone authenticator (directly)
+  shell: >-
+    /usr/bin/docker run
+    --rm
+    --name=gitlab-certbot
+    --cap-drop=ALL
+    -p 80:8080
+    -v {{ gitlab_ssl_config_dir_path }}:/etc/letsencrypt
+    -v {{ gitlab_ssl_log_dir_path }}:/var/log/letsencrypt
+    {{ gitlab_ssl_certbot_docker_image }}
+    certonly
+    --non-interactive
+    --work-dir=/tmp
+    --http-01-port 8080
+    {% if gitlab_ssl_use_staging %}--staging{% endif %}
+    --standalone
+    --preferred-challenges http
+    --agree-tos
+    --email={{ gitlab_ssl_support_email }}
+    -d {{ domain_name }}
+  when: "domain_name_needs_cert"
+  register: result_certbot_direct
+
+# If gitlab-nginx-proxy is already running, it will be able to forward requests to us.
+- name: Attempt initial SSL certificate retrieval with standalone authenticator (via proxy)
+  shell: >-
+    /usr/bin/docker run
+    --rm
+    --name=gitlab-certbot
+    -p 127.0.0.1:{{ gitlab_ssl_certbot_standalone_http_port }}:8080
+    -v {{ gitlab_ssl_config_dir_path }}:/etc/letsencrypt
+    -v {{ gitlab_ssl_log_dir_path }}:/var/log/letsencrypt
+    {{ gitlab_ssl_certbot_docker_image }}
+    certonly
+    --non-interactive
+    --work-dir=/tmp
+    --http-01-port 8080
+    {% if gitlab_ssl_use_staging %}--staging{% endif %}
+    --standalone
+    --preferred-challenges http
+    --agree-tos
+    --email={{ gitlab_ssl_support_email }}
+    -d {{ domain_name }}
+  when: "domain_name_needs_cert and result_certbot_direct.failed"
+  register: result_certbot_proxy
+  ignore_errors: true
+
+- name: Fail if all SSL certificate retrieval attempts failed
+  fail:
+    msg: |
+      Failed to obtain a certificate directly (by listening on port 80)
+      and also failed to obtain by relying on the server at port 80 to proxy the request.
+      See above for details.
+      You may wish to set up proxying of /.well-known/acme-challenge to {{ gitlab_ssl_certbot_standalone_http_port }} or,
+      more easily, stop the server on port 80 while this playbook runs.
+  when: "domain_name_needs_cert and result_certbot_direct.failed and result_certbot_proxy.failed"

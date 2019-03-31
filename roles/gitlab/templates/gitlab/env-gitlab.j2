@@ -1,0 +1,44 @@
+GITLAB_HOST={{ gitlab_server_fqn_gitlab }}
+
+GITLAB_HTTPS=true
+SSL_SELF_SIGNED=true
+NGINX_REAL_IP_RECURSIVE=on
+
+GITLAB_DEFAULT_THEME={{ gitlab_gitlab_default_theme }}
+
+GITLAB_USERNAME_CHANGE=false
+
+UNICORN_WORKERS={{ gitlab_unicorn_workers }}
+SIDEKIQ_CONCURRENCY={{ gitlab_sidekiq_concurrency }}
+
+GITLAB_PROJECTS_WIKI={{ gitlab_gitlab_projects_wiki|to_json }}
+GITLAB_PROJECTS_SNIPPETS={{ gitlab_gitlab_projects_snippets|to_json }}
+GITLAB_PROJECTS_BUILDS={{ gitlab_gitlab_projects_builds|to_json }}
+GITLAB_PROJECTS_ISSUES={{ gitlab_gitlab_projects_issues|to_json }}
+
+GITLAB_SECRETS_OTP_KEY_BASE={{ gitlab_gitlab_secrets_otp_key_base }}
+GITLAB_SECRETS_SECRET_KEY_BASE={{ gitlab_gitlab_secrets_secret_key_base }}
+GITLAB_SECRETS_DB_KEY_BASE={{ gitlab_gitlab_secrets_db_key_base }}
+
+GITLAB_EMAIL={{ gitlab_gitlab_email }}
+GITLAB_EMAIL_REPLY_TO={{ gitlab_gitlab_email_reply_to }}
+
+SMTP_ENABLED={{ gitlab_gitlab_smtp_enabled|to_json }}
+SMTP_DOMAIN={{ gitlab_gitlab_smtp_domain }}
+SMTP_HOST={{ gitlab_gitlab_smtp_host }}
+SMTP_PORT={{ gitlab_gitlab_smtp_port }}
+SMTP_USER={{ gitlab_gitlab_smtp_user }}
+SMTP_PASS={{ gitlab_gitlab_smtp_pass }}
+SMTL_TLS={{ gitlab_gitlab_smtp_tls|to_json }}
+SMTP_AUTHENTICATION={{ gitlab_gitlab_smtp_authentication }}
+
+GITLAB_MONITORING_SIDEKIQ_EXPORTER_ENABLED=false
+
+DB_ADAPTER=postgresql
+DB_HOST=gitlab-postgres
+DB_NAME={{ gitlab_postgres_db_name }}
+DB_USER={{ gitlab_postgres_connection_username }}
+DB_PASS={{ gitlab_postgres_connection_password }}
+
+REDIS_HOST=gitlab-redis
+REDIS_PORT=6379

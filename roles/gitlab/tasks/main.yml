@@ -1,0 +1,56 @@
+---
+
+- import_tasks: "{{ role_path }}/tasks/validate_config.yml"
+  tags:
+    - always
+
+- import_tasks: "{{ role_path }}/tasks/backup.yml"
+  tags:
+    - backup
+
+- import_tasks: "{{ role_path }}/tasks/setup_main.yml"
+  tags:
+    - setup-all
+
+- import_tasks: "{{ role_path }}/tasks/setup_ssl.yml"
+  tags:
+    - setup-ssl
+    - setup-all
+
+- import_tasks: "{{ role_path }}/tasks/setup_postgres.yml"
+  tags:
+    - setup-postgres
+    - setup-all
+
+- import_tasks: "{{ role_path }}/tasks/setup_redis.yml"
+  tags:
+    - setup-redis
+    - setup-all
+
+- import_tasks: "{{ role_path }}/tasks/setup_mailer.yml"
+  tags:
+    - setup-mailer
+    - setup-all
+
+- import_tasks: "{{ role_path }}/tasks/setup_gitlab.yml"
+  tags:
+    - setup-gitlab
+    - setup-all
+
+- import_tasks: "{{ role_path }}/tasks/setup_nginx_proxy.yml"
+  tags:
+    - setup-nginx-proxy
+    - setup-all
+
+- import_tasks: "{{ role_path }}/tasks/setup_backup.yml"
+  tags:
+    - setup-backup
+    - setup-all
+
+- import_tasks: "{{ role_path }}/tasks/restore_backup.yml"
+  tags:
+    - restore-backup
+
+- import_tasks: "{{ role_path }}/tasks/start.yml"
+  tags:
+    - start

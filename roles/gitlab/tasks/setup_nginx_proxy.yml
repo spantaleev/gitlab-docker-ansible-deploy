@@ -1,0 +1,47 @@
+---
+
+- name: Ensure nginx image is pulled
+  docker_image:
+    name: "{{ gitlab_nginx_proxy_docker_image }}"
+
+- name: Ensure Gitlab nginx-proxy paths exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0750
+    owner: "root"
+    group: "root"
+  with_items:
+    - "{{ gitlab_nginx_proxy_base_path }}"
+    - "{{ gitlab_nginx_proxy_data_path }}"
+    - "{{ gitlab_nginx_proxy_confd_path }}"
+
+- name: Ensure Gitlab nginx-proxy configured (main config override)
+  template:
+    src: "{{ role_path }}/templates/nginx-proxy/nginx.conf.j2"
+    dest: "{{ gitlab_nginx_proxy_base_path }}/nginx.conf"
+    mode: 0644
+
+- name: Ensure Gitlab nginx-proxy configured (Gitlab)
+  template:
+    src: "{{ role_path }}/templates/nginx-proxy/conf.d/gitlab.conf.j2"
+    dest: "{{ gitlab_nginx_proxy_confd_path }}/gitlab.conf"
+    mode: 0644
+
+- name: Ensure gitlab-nginx-proxy.service installed
+  template:
+    src: "{{ role_path }}/templates/nginx-proxy/gitlab-nginx-proxy.service.j2"
+    dest: "/etc/systemd/system/gitlab-nginx-proxy.service"
+    mode: 0644
+  register: gitlab_nginx_proxy_systemd_service_result
+
+- name: Ensure systemd reloaded after gitlab-nginx-proxy.service installation
+  service:
+    daemon_reload: yes
+  when: gitlab_nginx_proxy_systemd_service_result.changed
+
+- name: "Ensure periodic reload cronjob installed"
+  template:
+    src: "{{ role_path }}/templates/nginx-proxy/cron.d/gitlab-nginx-proxy-periodic-reload.j2"
+    dest: "/etc/cron.d/gitlab-nginx-proxy-periodic-reload"
+    mode: 0644
