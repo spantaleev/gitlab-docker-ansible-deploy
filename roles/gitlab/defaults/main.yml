@@ -19,8 +19,8 @@ gitlab_gitlab_log_dir_path: "{{ gitlab_gitlab_base_path }}/log"
 gitlab_gitlab_data_ssh_dir_path: "{{ gitlab_gitlab_data_dir_path }}/ssh"
 gitlab_gitlab_backups_dir_path: "{{ gitlab_gitlab_data_dir_path }}/backups"
 
-gitlab_gitlab_uid: 1000
-gitlab_gitlab_gid: 1000
+gitlab_gitlab_uid: "1000"
+gitlab_gitlab_gid: "1000"
 
 gitlab_unicorn_workers: 5
 gitlab_sidekiq_concurrency: 5
@@ -89,8 +89,8 @@ gitlab_ssl_use_staging: false
 gitlab_redis_base_path: "{{ gitlab_base_data_path }}/redis"
 gitlab_redis_data_path: "{{ gitlab_redis_base_path }}/data"
 gitlab_redis_docker_image: "redis:5.0.5-alpine"
-gitlab_redis_uid: 100
-gitlab_redis_gid: 101
+gitlab_redis_uid: "100"
+gitlab_redis_gid: "101"
 
 
 gitlab_postgres_base_path: "{{ gitlab_base_data_path }}/postgres"
@@ -98,8 +98,8 @@ gitlab_postgres_data_path: "{{ gitlab_postgres_base_path }}/data"
 gitlab_postgres_db_name: "gitlabhq_production"
 gitlab_postgres_connection_username: "gitlab"
 gitlab_postgres_connection_password: "gitlab"
-gitlab_postgres_uid: 101
-gitlab_postgres_gid: 103
+gitlab_postgres_uid: "101"
+gitlab_postgres_gid: "103"
 
 # We use this instead of the official one, because we enable some custom extension.
 # See the environment variables file for the server.

@@ -3,6 +3,7 @@
 - name: Ensure nginx image is pulled
   docker_image:
     name: "{{ gitlab_nginx_proxy_docker_image }}"
+    source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"
 
 - name: Ensure Gitlab nginx-proxy paths exist
   file:

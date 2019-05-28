@@ -1,4 +1,4 @@
-- hosts: gitlab-servers
+- hosts: gitlab_servers
   roles:
     - { role: server-base }
     - { role: gitlab }

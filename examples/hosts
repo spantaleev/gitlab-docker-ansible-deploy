@@ -1,4 +1,4 @@
-[gitlab-servers]
+[gitlab_servers]
 # To connect using a non-root user (and elevate to root with sudo later),
 # replace `ansible_ssh_user=root` with something like this: `ansible_ssh_user=username become=true become_user=root`
 #

@@ -3,6 +3,7 @@
 - name: Ensure Gitlab image is pulled
   docker_image:
     name: "{{ gitlab_gitlab_docker_image }}"
+    source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"
 
 - name: Ensure Gitlab paths exist
   file:

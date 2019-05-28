@@ -4,6 +4,7 @@
     - name: Ensure mailer image is pulled
       docker_image:
         name: "{{ gitlab_mailer_docker_image }}"
+        source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"
 
     - name: Ensure gitlab-mailer.service installed
       template:
@@ -16,7 +17,7 @@
       service:
         daemon_reload: yes
       when: gitlab_mailer_systemd_service_result.changed
-  when: gitlab_mailer_enabled
+  when: gitlab_mailer_enabled|bool
 
 - block:
     - name: Check existence of gitlab-mailer service

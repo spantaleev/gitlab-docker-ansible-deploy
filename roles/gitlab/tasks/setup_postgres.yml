@@ -3,6 +3,7 @@
 - name: Ensure Postgres image is pulled
   docker_image:
     name: "{{ gitlab_postgres_docker_image }}"
+    source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"
 
 - name: Ensure Postgres paths exist
   file:
