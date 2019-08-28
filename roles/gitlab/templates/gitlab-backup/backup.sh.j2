@@ -26,7 +26,7 @@ b2() {
 	-e B2_ACCOUNT_INFO=/tmp/backblaze-b2.db \
     -v {{ gitlab_backup_directory }}:{{ gitlab_backup_directory }} \
 	--user=`id -u`:`id -g` \
-	--entrypoint=/bin/sh tianon/backblaze-b2 -c "$cmd"
+	--entrypoint=/bin/sh tianon/backblaze-b2:1.3.6 -c "$cmd"
 }
 {% endif %}
 
