@@ -13,3 +13,12 @@
     - "gitlab_ssl_support_email"
     - "gitlab_backup_cron_email_to"
     - "gitlab_backup_encryption_password"
+
+- name: (Deprecation) Catch and report renamed variables
+  fail:
+    msg: >-
+      Your configuration contains a variable, which now has a different name.
+      Please change your configuration to rename the variable (`{{ item.old }}` -> `{{ item.new }}`).
+  when: "vars | dict2items | selectattr('key', 'match', item.old) | list | items2dict"
+  with_items:
+    - {'old': 'gitlab_unicorn_workers', 'new': 'gitlab_puma_workers'}

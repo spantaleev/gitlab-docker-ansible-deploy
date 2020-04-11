@@ -9,7 +9,7 @@ gitlab_docker_network: gitlab
 gitlab_base_data_path: "/gitlab"
 
 gitlab_gitlab_docker_image_template: "sameersbn/gitlab:__VERSION__"
-gitlab_gitlab_docker_image_tag: "12.8.8"
+gitlab_gitlab_docker_image_tag: "12.9.2"
 gitlab_gitlab_docker_image: "{{ gitlab_gitlab_docker_image_template|replace('__VERSION__', gitlab_gitlab_docker_image_tag) }}"
 
 # Gitlab-related data
@@ -22,7 +22,7 @@ gitlab_gitlab_backups_dir_path: "{{ gitlab_gitlab_data_dir_path }}/backups"
 gitlab_gitlab_uid: "1000"
 gitlab_gitlab_gid: "1000"
 
-gitlab_unicorn_workers: 5
+gitlab_puma_workers: 5
 gitlab_sidekiq_concurrency: 5
 
 gitlab_gitlab_default_theme: 2
