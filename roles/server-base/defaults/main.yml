@@ -1,0 +1,5 @@
+gitlab_docker_installation_enabled: true
+gitlab_docker_package_name: "docker-ce"
+
+gitlab_ntpd_package: "ntp"
+gitlab_ntpd_service: "{{ 'ntpd' if ansible_os_family == 'RedHat' or ansible_distribution == 'Archlinux' else 'ntp' }}"
