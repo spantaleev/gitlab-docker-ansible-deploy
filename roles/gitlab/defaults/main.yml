@@ -9,7 +9,7 @@ gitlab_docker_network: gitlab
 gitlab_base_data_path: "/gitlab"
 
 gitlab_gitlab_docker_image_template: "sameersbn/gitlab:__VERSION__"
-gitlab_gitlab_docker_image_tag: "12.10.4"
+gitlab_gitlab_docker_image_tag: "13.0.0"
 gitlab_gitlab_docker_image: "{{ gitlab_gitlab_docker_image_template|replace('__VERSION__', gitlab_gitlab_docker_image_tag) }}"
 
 # Gitlab-related data
@@ -103,7 +103,7 @@ gitlab_postgres_gid: "103"
 
 # We use this instead of the official one, because we enable some custom extension.
 # See the environment variables file for the server.
-gitlab_postgres_docker_image: "sameersbn/postgresql:10-2"
+gitlab_postgres_docker_image: "sameersbn/postgresql:12-20200524"
 
 
 # We use an official nginx image, which we fix-up to run unprivileged.
