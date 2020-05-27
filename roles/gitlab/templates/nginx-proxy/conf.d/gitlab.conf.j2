@@ -34,6 +34,8 @@ server {
 	ssl_prefer_server_ciphers on;
 	ssl_ciphers "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH";
 
+	client_max_body_size {{ gitlab_nginx_proxy_client_max_body_size_mb }}m;
+
 	location / {
 		{# Use the embedded DNS resolver in Docker containers to discover the service #}
 		resolver 127.0.0.11 valid=5s;

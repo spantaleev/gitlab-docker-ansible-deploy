@@ -117,6 +117,7 @@ gitlab_nginx_proxy_confd_path: "{{ gitlab_nginx_proxy_base_path }}/conf.d"
 
 gitlab_nginx_proxy_ssl_protocols: "TLSv1.2 TLSv1.3"
 
+gitlab_nginx_proxy_client_max_body_size_mb: 20
 
 gitlab_backup_user: backup
 gitlab_backup_cron_email_to: ""
