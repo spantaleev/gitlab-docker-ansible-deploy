@@ -9,7 +9,7 @@ gitlab_docker_network: gitlab
 gitlab_base_data_path: "/gitlab"
 
 gitlab_gitlab_docker_image_template: "sameersbn/gitlab:__VERSION__"
-gitlab_gitlab_docker_image_tag: "13.0.6"
+gitlab_gitlab_docker_image_tag: "13.2.2"
 gitlab_gitlab_docker_image: "{{ gitlab_gitlab_docker_image_template|replace('__VERSION__', gitlab_gitlab_docker_image_tag) }}"
 
 # Gitlab-related data
@@ -82,13 +82,13 @@ gitlab_ssl_config_dir_path: "{{ gitlab_ssl_base_path }}/config"
 gitlab_ssl_log_dir_path: "{{ gitlab_ssl_base_path }}/log"
 
 gitlab_ssl_support_email: ""
-gitlab_ssl_certbot_docker_image: "certbot/certbot:v1.5.0"
+gitlab_ssl_certbot_docker_image: "certbot/certbot:v1.6.0"
 gitlab_ssl_certbot_standalone_http_port: 2402
 gitlab_ssl_use_staging: false
 
 gitlab_redis_base_path: "{{ gitlab_base_data_path }}/redis"
 gitlab_redis_data_path: "{{ gitlab_redis_base_path }}/data"
-gitlab_redis_docker_image: "redis:6.0.5-alpine"
+gitlab_redis_docker_image: "redis:6.0.6-alpine"
 gitlab_redis_uid: "100"
 gitlab_redis_gid: "101"
 
