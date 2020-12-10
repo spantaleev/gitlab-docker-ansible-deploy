@@ -6,6 +6,7 @@ Requires=gitlab-postgres.service
 After=gitlab-postgres.service
 Requires=gitlab-redis.service
 After=gitlab-redis.service
+DefaultDependencies=no
 
 [Service]
 Type=simple
