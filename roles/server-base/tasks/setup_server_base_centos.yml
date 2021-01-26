@@ -29,6 +29,5 @@
   yum:
     name:
       - "{{ gitlab_docker_package_name }}"
-      - docker-python
     state: latest
   when: gitlab_docker_installation_enabled|bool
