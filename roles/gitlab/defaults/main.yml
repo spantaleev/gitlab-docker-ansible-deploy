@@ -9,7 +9,7 @@ gitlab_docker_network: gitlab
 gitlab_base_data_path: "/gitlab"
 
 gitlab_gitlab_docker_image_template: "docker.io/sameersbn/gitlab:__VERSION__"
-gitlab_gitlab_docker_image_tag: "13.10.2"
+gitlab_gitlab_docker_image_tag: "13.11.1"
 gitlab_gitlab_docker_image: "{{ gitlab_gitlab_docker_image_template|replace('__VERSION__', gitlab_gitlab_docker_image_tag) }}"
 
 # Gitlab-related data
@@ -82,13 +82,13 @@ gitlab_ssl_config_dir_path: "{{ gitlab_ssl_base_path }}/config"
 gitlab_ssl_log_dir_path: "{{ gitlab_ssl_base_path }}/log"
 
 gitlab_ssl_support_email: ""
-gitlab_ssl_certbot_docker_image: "docker.io/certbot/certbot:v1.13.0"
+gitlab_ssl_certbot_docker_image: "docker.io/certbot/certbot:v1.14.0"
 gitlab_ssl_certbot_standalone_http_port: 2402
 gitlab_ssl_use_staging: false
 
 gitlab_redis_base_path: "{{ gitlab_base_data_path }}/redis"
 gitlab_redis_data_path: "{{ gitlab_redis_base_path }}/data"
-gitlab_redis_docker_image: "docker.io/redis:6.2.1-alpine"
+gitlab_redis_docker_image: "docker.io/redis:6.2.2-alpine"
 gitlab_redis_uid: "100"
 gitlab_redis_gid: "101"
 
@@ -109,7 +109,7 @@ gitlab_postgres_docker_image: "docker.io/sameersbn/postgresql:12-20200524"
 # We use an official nginx image, which we fix-up to run unprivileged.
 # An alternative would be an `nginxinc/nginx-unprivileged` image, but
 # those as more frequently out of date.
-gitlab_nginx_proxy_docker_image: "docker.io/nginx:1.19.9-alpine"
+gitlab_nginx_proxy_docker_image: "docker.io/nginx:1.19.10-alpine"
 
 gitlab_nginx_proxy_base_path: "{{ gitlab_base_data_path }}/nginx-proxy"
 gitlab_nginx_proxy_data_path: "{{ gitlab_nginx_proxy_base_path }}/data"
