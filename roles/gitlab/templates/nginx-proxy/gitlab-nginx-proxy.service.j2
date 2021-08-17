@@ -18,6 +18,9 @@ ExecStart=/usr/bin/docker run --rm --name gitlab-nginx-proxy \
 			-v {{ gitlab_nginx_proxy_data_path }}:/nginx-data:ro \
 			-v {{ gitlab_nginx_proxy_confd_path }}:/etc/nginx/conf.d:ro \
 			-v {{ gitlab_ssl_config_dir_path }}:{{ gitlab_ssl_config_dir_path }}:ro \
+			{% for arg in gitlab_nginx_proxy_container_extra_arguments %}
+			{{ arg }} \
+			{% endfor %}
 			{{ gitlab_nginx_proxy_docker_image }}
 
 ExecStop=-/usr/bin/docker kill gitlab-nginx-proxy

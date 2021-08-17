@@ -111,6 +111,9 @@ gitlab_postgres_docker_image: "docker.io/sameersbn/postgresql:12-20200524"
 # those as more frequently out of date.
 gitlab_nginx_proxy_docker_image: "docker.io/nginx:1.21.1-alpine"
 
+# A list of extra arguments to pass to the container
+gitlab_nginx_proxy_container_extra_arguments: []
+
 gitlab_nginx_proxy_base_path: "{{ gitlab_base_data_path }}/nginx-proxy"
 gitlab_nginx_proxy_data_path: "{{ gitlab_nginx_proxy_base_path }}/data"
 gitlab_nginx_proxy_confd_path: "{{ gitlab_nginx_proxy_base_path }}/conf.d"
