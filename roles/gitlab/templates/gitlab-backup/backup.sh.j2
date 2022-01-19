@@ -35,10 +35,7 @@ encryption_password_file='{{ gitlab_backup_program_install_dir }}/encryption_pas
 target_backup_dir='{{ gitlab_backup_directory }}'
 date=`date +"%Y%m%d"`
 
-# Ignoring warning caused by this:
-# - https://github.com/sameersbn/docker-gitlab/issues/2442
-# - https://gitlab.com/gitlab-org/gitlab/-/issues/338182
-docker exec --user git gitlab-gitlab bundle exec rake gitlab:backup:create CRON=1 --no-deprecation-warnings 2>&1 | grep -v "WARNING: This installation of GitLab uses a deprecated syntax for 'config/database.yml'"
+docker exec --user git gitlab-gitlab bundle exec rake gitlab:backup:create CRON=1 --no-deprecation-warnings 2>&1 | grep -v "File contains invisible non-breaking spaces, you may want to remove those"
 
 for backup_path in $(find $gitlab_source_backup_dir -name '*.tar'); do
 	backup_name=$date'-{{ gitlab_server_fqn_gitlab }}-'$(basename $backup_path)'.gpg'
