@@ -3,6 +3,14 @@
 # The fully-qualified name of your Gitlab server (e.g. `gitlab.example.com`)
 gitlab_server_fqn_gitlab: ''
 
+gitlab_host_command_docker: "/usr/bin/env docker"
+gitlab_host_command_sh: "/usr/bin/env sh"
+
+# Specifies the path to use for the `HOME` environment variable for systemd unit files.
+# Docker 20.10 complains with `WARNING: Error loading config file: .dockercfg: $HOME is not defined`
+# if `$HOME` is not defined, so we define something to make it happy.
+gitlab_systemd_unit_home_path: /root
+
 gitlab_docker_network: gitlab
 
 # Base directory that contains everything

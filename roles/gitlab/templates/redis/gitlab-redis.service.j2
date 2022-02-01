@@ -6,20 +6,22 @@ DefaultDependencies=no
 
 [Service]
 Type=simple
-ExecStartPre=-/usr/bin/docker kill gitlab-redis
-ExecStartPre=-/usr/bin/docker rm gitlab-redis
+Environment="HOME={{ gitlab_systemd_unit_home_path }}"
+ExecStartPre=-{{ gitlab_host_command_sh }} -c '{{ gitlab_host_command_docker }} kill gitlab-redis 2>/dev/null'
+ExecStartPre=-{{ gitlab_host_command_sh }} -c '{{ gitlab_host_command_docker }} rm gitlab-redis 2>/dev/null'
 
-ExecStart=/usr/bin/docker run --rm --name gitlab-redis \
+ExecStart={{ gitlab_host_command_docker }} run --rm --name gitlab-redis \
 			--log-driver=none \
 			--network={{ gitlab_docker_network }} \
 			-v {{ gitlab_redis_data_path }}:/data:rw \
 			{{ gitlab_redis_docker_image }} \
 			redis-server --appendonly yes
 
-ExecStop=-/usr/bin/docker kill gitlab-redis
-ExecStop=-/usr/bin/docker rm gitlab-redis
+ExecStop=-{{ gitlab_host_command_sh }} -c '{{ gitlab_host_command_docker }} kill gitlab-redis 2>/dev/null'
+ExecStop=-{{ gitlab_host_command_sh }} -c '{{ gitlab_host_command_docker }} rm gitlab-redis 2>/dev/null'
 Restart=always
 RestartSec=30
+SyslogIdentifier=gitlab-redis
 
 [Install]
 WantedBy=multi-user.target

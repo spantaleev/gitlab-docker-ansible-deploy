@@ -6,8 +6,9 @@ DefaultDependencies=no
 
 [Service]
 Type=simple
-ExecStartPre=-/usr/bin/docker kill gitlab-postgres
-ExecStartPre=-/usr/bin/docker rm gitlab-postgres
+Environment="HOME={{ gitlab_systemd_unit_home_path }}"
+ExecStartPre=-{{ gitlab_host_command_sh }} -c '{{ gitlab_host_command_docker }} kill gitlab-postgres 2>/dev/null'
+ExecStartPre=-{{ gitlab_host_command_sh }} -c '{{ gitlab_host_command_docker }} rm gitlab-postgres 2>/dev/null'
 
 ExecStart=/usr/bin/docker run --rm --name gitlab-postgres \
 			--log-driver=none \
@@ -16,10 +17,11 @@ ExecStart=/usr/bin/docker run --rm --name gitlab-postgres \
 			-v {{ gitlab_postgres_data_path }}:/var/lib/postgresql:rw \
 			{{ gitlab_postgres_docker_image }}
 
-ExecStop=-/usr/bin/docker kill gitlab-postgres
-ExecStop=-/usr/bin/docker rm gitlab-postgres
+ExecStop=-{{ gitlab_host_command_sh }} -c '{{ gitlab_host_command_docker }} kill gitlab-postgres 2>/dev/null'
+ExecStop=-{{ gitlab_host_command_sh }} -c '{{ gitlab_host_command_docker }} rm gitlab-postgres 2>/dev/null'
 Restart=always
 RestartSec=30
+SyslogIdentifier=gitlab-postgres
 
 [Install]
 WantedBy=multi-user.target
