@@ -1,25 +1,37 @@
+#jinja2: lstrip_blocks: "True"
 [Unit]
 Description=Gitlab mailer
-Requires=docker.service
 After=docker.service
+Requires=docker.service
 DefaultDependencies=no
 
 [Service]
 Type=simple
-ExecStartPre=-/usr/bin/docker kill gitlab-mailer
-ExecStartPre=-/usr/bin/docker rm gitlab-mailer
+Environment="HOME={{ gitlab_systemd_unit_home_path }}"
+ExecStartPre=-{{ gitlab_host_command_sh }} -c '{{ gitlab_host_command_docker }} kill gitlab-mailer 2>/dev/null'
+ExecStartPre=-{{ gitlab_host_command_sh }} -c '{{ gitlab_host_command_docker }} rm gitlab-mailer 2>/dev/null'
 
-ExecStart=/usr/bin/docker run --rm --name gitlab-mailer \
+# --hostname gives us a friendlier hostname than the default.
+# The real hostname is passed via a `HOSTNAME` environment variable though.
+ExecStart={{ gitlab_host_command_docker }} run --rm --name gitlab-mailer \
 			--log-driver=none \
+			--user={{ gitlab_mailer_container_user_uid }}:{{ gitlab_mailer_container_user_gid }} \
+			--cap-drop=ALL \
+			--read-only \
+			--tmpfs=/var/spool/exim:rw,noexec,nosuid,size=100m \
 			--network={{ gitlab_docker_network }} \
-			--hostname={{ gitlab_server_fqn_gitlab }} \
-			-e POSTFIX_myhostname={{ gitlab_server_fqn_gitlab }} \
+			--env-file={{ gitlab_mailer_base_path }}/env-mailer \
+			--hostname=gitlab-mailer \
+			{% for arg in gitlab_mailer_container_extra_arguments %}
+			{{ arg }} \
+			{% endfor %}
 			{{ gitlab_mailer_docker_image }}
 
-ExecStop=-/usr/bin/docker kill gitlab-mailer
-ExecStop=-/usr/bin/docker rm gitlab-mailer
+ExecStop=-{{ gitlab_host_command_sh }} -c '{{ gitlab_host_command_docker }} kill gitlab-mailer 2>/dev/null'
+ExecStop=-{{ gitlab_host_command_sh }} -c '{{ gitlab_host_command_docker }} rm gitlab-mailer 2>/dev/null'
 Restart=always
 RestartSec=30
+SyslogIdentifier=gitlab-mailer
 
 [Install]
 WantedBy=multi-user.target

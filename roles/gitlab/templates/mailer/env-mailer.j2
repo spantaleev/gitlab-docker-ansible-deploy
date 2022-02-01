@@ -1,0 +1,9 @@
+#jinja2: lstrip_blocks: "True"
+{% if gitlab_mailer_relay_use %}
+SMARTHOST={{ gitlab_mailer_relay_host_name }}::{{ gitlab_mailer_relay_host_port }}
+{% endif %}
+{% if gitlab_mailer_relay_auth %}
+SMTP_USERNAME={{ gitlab_mailer_relay_auth_username }}
+SMTP_PASSWORD={{ gitlab_mailer_relay_auth_password }}
+{% endif %}
+HOSTNAME={{ gitlab_mailer_hostname }}

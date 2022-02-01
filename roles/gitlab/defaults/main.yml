@@ -40,15 +40,18 @@ gitlab_gitlab_projects_snippets: true
 gitlab_gitlab_projects_builds: true
 gitlab_gitlab_projects_issues: true
 
-# By default, we try to send through our own mailer service.
+# By default, we send mail through our own mailer service.
+#
 # If you're using an external SMTP server, you might wish to:
-# - disable our own mailer service (`gitlab_mailer_enabled: false`)
-# - enable TLS (`gitlab_gitlab_smtp_tls: true`)
-# - use `gitlab_gitlab_smtp_authentication: login`
+# 1. Either configure the gitlab-mailer service to relay through your SMTP server. See the `gitlab_mailer_*` variables.
+# 2. Or, make Gitlab send through another SMTP server by:
+# - disabling the mailer service (`gitlab_mailer_enabled: false`)
+# - enabling TLS below (`gitlab_gitlab_smtp_tls: true`)
+# - using `gitlab_gitlab_smtp_authentication: login`, etc.
 gitlab_gitlab_smtp_enabled: true
 gitlab_gitlab_smtp_domain: "{{ gitlab_server_fqn_gitlab }}"
 gitlab_gitlab_smtp_host: "gitlab-mailer"
-gitlab_gitlab_smtp_port: 25
+gitlab_gitlab_smtp_port: 8025
 gitlab_gitlab_smtp_tls: false
 gitlab_gitlab_smtp_user: ""
 gitlab_gitlab_smtp_pass: ""
@@ -150,12 +153,28 @@ gitlab_backup_b2_base_path: "gitlab"
 gitlab_backup_b2_key_id: ~
 gitlab_backup_b2_key_secret: ~
 
-
 # Controls whether to run our own SMTP server.
 # If you'll be using an external one, feel free to disable this.
 gitlab_mailer_enabled: true
-gitlab_mailer_docker_image: "mwader/postfix-relay:latest"
+gitlab_mailer_docker_image: "docker.io/devture/exim-relay:4.95-r0-2"
+gitlab_mailer_base_path: "{{ gitlab_base_data_path }}/mailer"
 
+# The user/group that the container runs with.
+# These match the `exim` user/group within the container image.
+gitlab_mailer_container_user_uid: 100
+gitlab_mailer_container_user_gid: 101
+
+# A list of extra arguments to pass to the container
+gitlab_mailer_container_extra_arguments: []
+
+gitlab_mailer_hostname: "{{ gitlab_server_fqn_gitlab }}"
+
+gitlab_mailer_relay_use: false
+gitlab_mailer_relay_host_name: "mail.example.com"
+gitlab_mailer_relay_host_port: 587
+gitlab_mailer_relay_auth: false
+gitlab_mailer_relay_auth_username: ""
+gitlab_mailer_relay_auth_password: ""
 
 gitlab_services_list: |
   {{
