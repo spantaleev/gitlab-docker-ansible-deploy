@@ -1,5 +1,5 @@
 gitlab_docker_installation_enabled: true
 gitlab_docker_package_name: "docker-ce"
 
-gitlab_ntpd_package: "ntp"
-gitlab_ntpd_service: "{{ 'ntpd' if ansible_os_family == 'RedHat' or ansible_distribution == 'Archlinux' else 'ntp' }}"
+gitlab_ntpd_package: "{{ 'systemd-timesyncd' if (ansible_os_family == 'RedHat' and ansible_distribution_major_version|int > 7) or (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int > 18)  else ( 'systemd' if ansible_os_family == 'Suse' else 'ntp' ) }}"
+gitlab_ntpd_service: "{{ 'systemd-timesyncd' if (ansible_os_family == 'RedHat' and ansible_distribution_major_version|int > 7) or (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int > 18) or ansible_distribution == 'Archlinux' or ansible_os_family == 'Suse' else ('ntpd' if ansible_os_family == 'RedHat' else 'ntp') }}"
