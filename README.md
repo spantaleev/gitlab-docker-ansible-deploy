@@ -24,7 +24,7 @@ This playbook sets up your server using the following Docker images:
 
 - [sameersbn/postgresql](https://hub.docker.com/r/sameersbn/postgresql) - the [sameersbn/docker-postgresql](https://github.com/sameersbn/docker-postgresql) Postgres server. **Note**: we don't use the official Postgres image, because Gitlab requires additional extensions (`pg_trgm`).
 
-- [mwader/postfix-relay](https://hub.docker.com/r/mwader/postfix-relay) - a [Postfix](http://www.postfix.org/) SMTP server we use by default, so that Gitlab can send emails
+- [devture/exim-relay](https://hub.docker.com/r/devture/exim-relay) - an [Exim](https://www.exim.org/) SMTP server we use by default, so that Gitlab can send emails. By default, email is delivered directly, but you can also configure the service to relay emails through another SMTP server.
 
 
 
