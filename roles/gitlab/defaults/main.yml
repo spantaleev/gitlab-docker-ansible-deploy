@@ -17,7 +17,7 @@ gitlab_docker_network: gitlab
 gitlab_base_data_path: "/gitlab"
 
 gitlab_gitlab_docker_image_template: "docker.io/sameersbn/gitlab:__VERSION__"
-gitlab_gitlab_docker_image_tag: "14.10.0"
+gitlab_gitlab_docker_image_tag: "14.10.2"
 gitlab_gitlab_docker_image: "{{ gitlab_gitlab_docker_image_template|replace('__VERSION__', gitlab_gitlab_docker_image_tag) }}"
 
 # Gitlab-related data
@@ -156,7 +156,7 @@ gitlab_backup_b2_key_secret: ~
 # Controls whether to run our own SMTP server.
 # If you'll be using an external one, feel free to disable this.
 gitlab_mailer_enabled: true
-gitlab_mailer_docker_image: "docker.io/devture/exim-relay:4.95-r0-2"
+gitlab_mailer_docker_image: "docker.io/devture/exim-relay:4.95-r0-3"
 gitlab_mailer_base_path: "{{ gitlab_base_data_path }}/mailer"
 
 # The user/group that the container runs with.
