@@ -1,0 +1,28 @@
+[Unit]
+Description=Gitlab Runner
+Requires=docker.service
+After=docker.service
+DefaultDependencies=no
+
+[Service]
+Type=simple
+Environment="HOME={{ gitlab_systemd_unit_home_path }}"
+ExecStartPre=-{{ gitlab_host_command_sh }} -c '{{ gitlab_host_command_docker }} kill gitlab-runner 2>/dev/null'
+ExecStartPre=-{{ gitlab_host_command_sh }} -c '{{ gitlab_host_command_docker }} rm gitlab-runner 2>/dev/null'
+
+ExecStart={{ gitlab_host_command_docker }} run --rm --name gitlab-runner \
+			--log-driver=none \
+			--network={{ gitlab_docker_network }} \
+			--mount type=bind,src={{ gitlab_runner_docker_socket_path }},dst=/var/run/docker.sock \
+			--mount type=bind,src={{ gitlab_runner_config_path }},dst=/etc/gitlab-runner \
+			--add-host {{ gitlab_runner_container_add_host_domain_name }}:{{ gitlab_runner_container_add_host_ip_address }} \
+			{{ gitlab_runner_container_image }}
+
+ExecStop=-{{ gitlab_host_command_sh }} -c '{{ gitlab_host_command_docker }} kill gitlab-runner 2>/dev/null'
+ExecStop=-{{ gitlab_host_command_sh }} -c '{{ gitlab_host_command_docker }} rm gitlab-runner 2>/dev/null'
+Restart=always
+RestartSec=30
+SyslogIdentifier=gitlab-runner
+
+[Install]
+WantedBy=multi-user.target

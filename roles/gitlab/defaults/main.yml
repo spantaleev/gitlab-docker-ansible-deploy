@@ -187,4 +187,67 @@ gitlab_services_list: |
     (['gitlab-nginx-proxy.service'])
     +
     (['gitlab-mailer.service'] if gitlab_mailer_enabled else [])
+    +
+    (['gitlab-runner.service'] if gitlab_runner_enabled else [])
   }}
+
+# Controls whether to install a Gitlab Runner service.
+#
+# As with everything else, the runner also runs in a container.
+# Since this runner runs on the Gitlab host itself, it's ONLY suitable for trusted workloads.
+#
+# Installing the runner requires some more manual work.
+# Basically, registering needs to be done with a `register` command. The runner insists on overwriting its own configuration file (config.toml).
+# See: https://gitlab.com/gitlab-org/gitlab-runner/-/issues/1932
+#
+# Steps to install:
+# 1. Use `gitlab_runner_enabled: true` in your `vars.yml`
+# 2. Install (`--tags=setup-all,start`)
+# 3. Find the Gitlab Runner registration token by pressing the **Register an instance runner** button from the admin panel: https://gitlab.DOMAIN/admin/runners
+# 4. Run the following command on the Gitlab host:
+#
+# docker exec -t gitlab-runner /entrypoint register \
+# --registration-token=REGISTRATION_TOKEN_HERE \
+# --docker-image=docker.io/docker:20.10 \
+# --name=runner.gitlab.DOMAIN \
+# --url=https://gitlab.DOMAIN \
+# --executor=docker \
+# --non-interactive
+#
+# ^^ Replace `REGISTRATION_TOKEN` (value from step 3) and `DOMAIN`
+#
+# 5. Get the `token` value from the configuration (`grep token /gitlab/runner/config.toml`). This is a "runner token". Not to be confused with the registration token (step 3).
+# 6. Put that runner token (from step 5) into `gitlab_runner_configuration_runners_token` in your `vars.yml` file
+# 7. Re-run the install (`--tags=setup-all,start`)
+# 8. Optionally restrict which projects can run builds on this runner from the admin panel: https://gitlab.DOMAIN/admin/runners
+gitlab_runner_enabled: false
+
+gitlab_runner_base_path: "{{ gitlab_base_data_path }}/runner"
+gitlab_runner_config_path: "{{ gitlab_runner_base_path }}/config"
+
+gitlab_runner_container_image: "docker.io/gitlab/gitlab-runner:{{ gitlab_runner_container_image_version }}"
+gitlab_runner_container_image_version: v14.10.1
+
+# The runner needs to talk to Gitlab (`https://gitlab.DOMAIN`) over the public IP address.
+# `gitlab.DOMAIN` in the container would usually resolve to some internal docker network IP address, which is not really accessible.
+# Port 443 is exposed via nginx anyway. Defining the Gitlab Runner URL as `http://gitlab-gitlab:80` does not work (a redirect is issued there).
+# To make `gitlab.DOMAIN` resolve to the public IP address, we use `--add-host DOMAIN:IP` in our `docker run` call.
+#
+# With the definition below, we assume that `ansible_host` (coming from `inventory/hosts`) is a public IP address.
+# If not, override `gitlab_runner_container_add_host_ip_address`
+gitlab_runner_container_add_host_domain_name: "{{ gitlab_server_fqn_gitlab }}"
+gitlab_runner_container_add_host_ip_address: "{{ ansible_host }}"
+
+gitlab_runner_docker_socket_path: /var/run/docker.sock
+
+# Controls how many jobs can be processed concurrently.
+gitlab_runner_configuration_concurrent: 1
+
+# The interval length, in seconds, between new jobs check. If set to 0 or lower, a default value (3 seconds) is used.
+gitlab_runner_configuration_check_interval: 0
+
+gitlab_runner_configuration_log_level: info
+
+gitlab_runner_configuration_runners_name: runner.{{ gitlab_server_fqn_gitlab }}
+
+gitlab_runner_configuration_runners_token: ''

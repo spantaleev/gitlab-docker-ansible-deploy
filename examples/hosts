@@ -4,4 +4,7 @@
 #
 # For improved Ansible performance, SSH pipelining is enabled by default (`ansible_ssh_pipelining=yes`).
 # If this causes SSH connection troubles, feel free to disable it.
-gitlab.<your-domain> ansible_host=<your-server's IP address> ansible_ssh_port=222 ansible_ssh_pipelining=yes
+#
+# We explicitly ask for your server's external IP address, because the same value is used for configuring the Gitlab Runner (if enabled).
+# If you'd rather use a local IP here, make sure to set up `gitlab_runner_container_add_host_ip_address`.
+gitlab.<your-domain> ansible_host=<your-server's external IP address> ansible_ssh_port=222 ansible_ssh_pipelining=yes

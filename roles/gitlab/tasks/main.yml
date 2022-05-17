@@ -37,6 +37,11 @@
     - setup-gitlab
     - setup-all
 
+- import_tasks: "{{ role_path }}/tasks/setup_runner.yml"
+  tags:
+    - setup-runner
+    - setup-all
+
 - import_tasks: "{{ role_path }}/tasks/setup_nginx_proxy.yml"
   tags:
     - setup-nginx-proxy
