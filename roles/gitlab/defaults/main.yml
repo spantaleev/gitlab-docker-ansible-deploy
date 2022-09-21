@@ -93,7 +93,7 @@ gitlab_ssl_config_dir_path: "{{ gitlab_ssl_base_path }}/config"
 gitlab_ssl_log_dir_path: "{{ gitlab_ssl_base_path }}/log"
 
 gitlab_ssl_support_email: ""
-gitlab_ssl_certbot_docker_image: "docker.io/certbot/certbot:v1.29.0"
+gitlab_ssl_certbot_docker_image: "docker.io/certbot/certbot:v1.30.0"
 gitlab_ssl_certbot_standalone_http_port: 2402
 gitlab_ssl_use_staging: false
 
