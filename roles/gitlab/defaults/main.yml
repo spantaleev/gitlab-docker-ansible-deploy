@@ -17,7 +17,7 @@ gitlab_docker_network: gitlab
 gitlab_base_data_path: "/gitlab"
 
 gitlab_gitlab_docker_image_template: "docker.io/sameersbn/gitlab:__VERSION__"
-gitlab_gitlab_docker_image_tag: "15.3.3"
+gitlab_gitlab_docker_image_tag: "15.4.0"
 gitlab_gitlab_docker_image: "{{ gitlab_gitlab_docker_image_template|replace('__VERSION__', gitlab_gitlab_docker_image_tag) }}"
 
 # Gitlab-related data
@@ -99,7 +99,7 @@ gitlab_ssl_use_staging: false
 
 gitlab_redis_base_path: "{{ gitlab_base_data_path }}/redis"
 gitlab_redis_data_path: "{{ gitlab_redis_base_path }}/data"
-gitlab_redis_docker_image: "docker.io/redis:7.0.4-alpine"
+gitlab_redis_docker_image: "docker.io/redis:7.0.5-alpine"
 gitlab_redis_uid: "100"
 gitlab_redis_gid: "101"
 
@@ -226,7 +226,7 @@ gitlab_runner_base_path: "{{ gitlab_base_data_path }}/runner"
 gitlab_runner_config_path: "{{ gitlab_runner_base_path }}/config"
 
 gitlab_runner_container_image: "docker.io/gitlab/gitlab-runner:{{ gitlab_runner_container_image_version }}"
-gitlab_runner_container_image_version: v15.3.0
+gitlab_runner_container_image_version: v15.4.0
 
 # The runner needs to talk to Gitlab (`https://gitlab.DOMAIN`) over the public IP address.
 # `gitlab.DOMAIN` in the container would usually resolve to some internal docker network IP address, which is not really accessible.
