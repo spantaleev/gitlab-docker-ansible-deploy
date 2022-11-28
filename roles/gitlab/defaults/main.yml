@@ -17,7 +17,7 @@ gitlab_docker_network: gitlab
 gitlab_base_data_path: "/gitlab"
 
 gitlab_gitlab_docker_image_template: "docker.io/sameersbn/gitlab:__VERSION__"
-gitlab_gitlab_docker_image_tag: "15.5.4"
+gitlab_gitlab_docker_image_tag: "15.6.0"
 gitlab_gitlab_docker_image: "{{ gitlab_gitlab_docker_image_template|replace('__VERSION__', gitlab_gitlab_docker_image_tag) }}"
 
 # Gitlab-related data
@@ -93,7 +93,7 @@ gitlab_ssl_config_dir_path: "{{ gitlab_ssl_base_path }}/config"
 gitlab_ssl_log_dir_path: "{{ gitlab_ssl_base_path }}/log"
 
 gitlab_ssl_support_email: ""
-gitlab_ssl_certbot_docker_image: "docker.io/certbot/certbot:v1.31.0"
+gitlab_ssl_certbot_docker_image: "docker.io/certbot/certbot:v2.0.0"
 gitlab_ssl_certbot_standalone_http_port: 2402
 gitlab_ssl_use_staging: false
 
@@ -120,7 +120,7 @@ gitlab_postgres_docker_image: "docker.io/sameersbn/postgresql:12-20200524"
 # We use an official nginx image, which we fix-up to run unprivileged.
 # An alternative would be an `nginxinc/nginx-unprivileged` image, but
 # those as more frequently out of date.
-gitlab_nginx_proxy_docker_image: "docker.io/nginx:1.23.1-alpine"
+gitlab_nginx_proxy_docker_image: "docker.io/nginx:1.23.2-alpine"
 
 # A list of extra arguments to pass to the container
 gitlab_nginx_proxy_container_extra_arguments: []
@@ -226,7 +226,7 @@ gitlab_runner_base_path: "{{ gitlab_base_data_path }}/runner"
 gitlab_runner_config_path: "{{ gitlab_runner_base_path }}/config"
 
 gitlab_runner_container_image: "docker.io/gitlab/gitlab-runner:{{ gitlab_runner_container_image_version }}"
-gitlab_runner_container_image_version: v15.5.0
+gitlab_runner_container_image_version: v15.6.0
 
 # The runner needs to talk to Gitlab (`https://gitlab.DOMAIN`) over the public IP address.
 # `gitlab.DOMAIN` in the container would usually resolve to some internal docker network IP address, which is not really accessible.
