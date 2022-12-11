@@ -156,7 +156,7 @@ gitlab_backup_b2_key_secret: ~
 # Controls whether to run our own SMTP server.
 # If you'll be using an external one, feel free to disable this.
 gitlab_mailer_enabled: true
-gitlab_mailer_docker_image: "docker.io/devture/exim-relay:4.95-r0-4"
+gitlab_mailer_docker_image: "docker.io/devture/exim-relay:4.96-r1-0"
 gitlab_mailer_base_path: "{{ gitlab_base_data_path }}/mailer"
 
 # The user/group that the container runs with.
