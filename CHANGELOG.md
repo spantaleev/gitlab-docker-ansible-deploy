@@ -1,3 +1,10 @@
+# 2023-03-07
+
+## Not actively maintained anymore
+
+This Ansible playbook is **not actively maintained anymore**. It may be out of date and generally not of very high quality. Send some PRs or get in touch if you'd like to maintain it. Users are generally recommended to migrate their Gitlab installation to the [gitea-docker-ansible-deploy](https://github.com/spantaleev/gitea-docker-ansible-deploy) playbook (powered by [Gitea](https://gitea.io/en-us/), an alternative to Gitlab).
+
+
 # 2019-05-28
 
 ## Ansible 2.8 compatibility

@@ -1,5 +1,7 @@
 # Gitlab server setup using Ansible and Docker
 
+**WARNING**: This Ansible playbook is **not actively maintained anymore**. It may be out of date and generally not of very high quality. Send some PRs or get in touch if you'd like to maintain it. Users are generally recommended to migrate their Gitlab installation to the [gitea-docker-ansible-deploy](https://github.com/spantaleev/gitea-docker-ansible-deploy) playbook (powered by [Gitea](https://gitea.io/en-us/), an alternative to Gitlab).
+
 This [Ansible](https://www.ansible.com/) playbook can help you set up a [Gitlab](https://about.gitlab.com/) instance:
 
 - on your own Debian/CentOS/RedHat server
